@@ -1,7 +1,7 @@
-import json
 from tools.weather import ThirdPartInfo
 from tools.redis_connection import r
 import time
+from settings import LOCATION
 
 
 def log(message):
@@ -10,9 +10,8 @@ def log(message):
 
 
 def main():
-    with open('./config.json', "r") as f:
-        location = json.load(f).get('location')
     obj = ThirdPartInfo()
+    location = LOCATION
     if not location:
         ip = obj.GetOuterIP()
         location = obj.IPLocation(ip)
