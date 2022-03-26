@@ -10,7 +10,7 @@ def log(message):
 
 
 def main():
-    with open('/home/pi/magic_mirror/scripts/config.json', "r") as f:
+    with open('./config.json', "r") as f:
         location = json.load(f).get('location')
     obj = ThirdPartInfo()
     if not location:
