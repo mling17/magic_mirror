@@ -168,10 +168,13 @@ class PiRun(object):
                 logger.info('Temp={0:0.1f}*C,Humidity={1:0.1f}%'.format(temperature, humidity))
                 self.pi.redis.hset('house_temp_hum', mapping={'temp': temperature, 'hum': humidity})  # 存入redis
                 if TEMP_HUM_STORAGE:
-                    result = requests.post(url=TEMP_HUM_API,
-                                           data={"temperature": temperature, "humidity": humidity}).text
-                    logger.info(f'Temperature and humidity storage success.')
-                    if result != 'ok':
+                    try:
+                        result = requests.post(url=TEMP_HUM_API,
+                                               data={"temperature": temperature, "humidity": humidity}).text
+                        logger.info(f'Temperature and humidity storage success.')
+                        if result != 'ok':
+                            sleep = 1
+                    except Exception as e:
                         sleep = 1
             else:
                 sleep = 1
