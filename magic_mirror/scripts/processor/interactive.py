@@ -1,4 +1,3 @@
-import datetime
 import time
 from tools import sentence  # 一句话
 from tools import live  # 出生到现在的天数

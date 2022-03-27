@@ -17,5 +17,17 @@ REDIS_PASSWORD = env.str('PROXYPOOL_REDIS_PASSWORD',
 # redis db, if no choice, set it to 0
 REDIS_DB = env.int('PROXYPOOL_REDIS_DB', env.int('REDIS_DB', 0))
 
+REDIS_CONNECTION_STRING = env.str(
+    'REDIS_CONNECTION_STRING', env.str('REDIS_CONNECTION_STRING', None))
+REDIS_KEY = env.str('REDIS_KEY', env.str(
+    'REDIS_KEY', 'proxies:universal'))
 # read location，weather use it.
 LOCATION = env.str('PI_LOCATION', '潍坊')
+
+# enable switch
+ENABLE_DHT11 = True
+
+# dht11
+GPIO_DHT11 = 17
+TEMP_HUM_API = "http://127.0.0.1:8000/temp_hum/"
+TEMP_HUM_STORAGE = True

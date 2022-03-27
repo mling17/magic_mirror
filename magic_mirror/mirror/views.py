@@ -5,6 +5,7 @@ import datetime
 from django.http import JsonResponse, HttpResponse
 from django_redis import get_redis_connection
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from mirror import models
 import json
 import redis
@@ -139,6 +140,7 @@ def forecast(request):
     return JsonResponse(forecast_info, safe=False)
 
 
+@csrf_exempt
 def temp_hum(request):
     if request.method == 'GET':
         data = r.hgetall('house_temp_hum')
@@ -151,7 +153,7 @@ def temp_hum(request):
     temp = float(request.POST.get('temperature'))
     hum = float(request.POST.get('humidity'))
     try:
-        r.hset('house_temp_hum', mapping={'temp': temp, 'hum': hum})
+        # r.hset('house_temp_hum', mapping={'temp': temp, 'hum': hum})
         models.TempHum.objects.create(temperature=temp, humidity=hum)
     except Exception as e:
         return HttpResponse(e)
@@ -184,6 +186,7 @@ def todo(request):
             if title not in ret_list:
                 ret_list.insert(0, title)
     return JsonResponse(ret_list, safe=False)
+
 
 def pi_info(request):
     info = r.hgetall('pi_info')

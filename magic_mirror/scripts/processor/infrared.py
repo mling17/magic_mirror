@@ -1,3 +1,6 @@
+"""
+人体传感器
+"""
 import time
 import RPi.GPIO as GPIO
 
