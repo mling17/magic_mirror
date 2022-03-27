@@ -170,13 +170,14 @@ class PiRun(object):
                 if TEMP_HUM_STORAGE:
                     try:
                         result = requests.post(url=TEMP_HUM_API,
-                                               data={"temperature": temperature, "humidity": humidity}).text
+                                               data={"temperature": temperature, "humidity": humidity}, timeout=1).text
                         logger.info(f'Temperature and humidity storage success.')
                         if result != 'ok':
                             sleep = 1
                     except Exception as e:
                         sleep = 1
             else:
+                print(f'err-->,hum:{humidity},temp:{temperature}')
                 sleep = 1
             time.sleep(sleep)
 
