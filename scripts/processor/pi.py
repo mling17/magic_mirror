@@ -13,7 +13,7 @@ import Adafruit_DHT
 import RPi.GPIO as GPIO
 from scripts.settings import TEMP_HUM_API, GPIO_DHT11, TEMP_HUM_STORAGE, GPIO_FAN, FAN_HIGH_TEMP, \
     FAN_LOW_TEMP, FAN_ENABLE_TIME
-from ..storages.redis import RedisClient
+from .redis_conn import RedisClient
 
 sensor = Adafruit_DHT.DHT11
 

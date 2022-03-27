@@ -1,5 +1,5 @@
-from scripts.scheduler import Scheduler
-import argparse
+#from scripts.scheduler import Scheduler
+#import argparse
 
 # parser = argparse.ArgumentParser(description='ProxyPool')
 # parser.add_argument('--processor', type=str, help='processor to run')
@@ -11,4 +11,7 @@ if __name__ == '__main__':
     #     getattr(Scheduler(), f'run_{args.processor}')()
     # else:
     #     Scheduler().run()
-    Scheduler().run()
+    #Scheduler().run()
+    from processor.test import a
+    print(a)
+    

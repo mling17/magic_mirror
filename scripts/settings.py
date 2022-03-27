@@ -1,7 +1,7 @@
 import platform
 from os.path import dirname, abspath, join
 from environs import Env
-from loguru import logger
+#from loguru import logger
 
 env = Env()
 env.read_env()
