@@ -7,15 +7,20 @@
 
 import os
 import time
+import json
 import socket
 import requests
+import multiprocessing
 import Adafruit_DHT
 import RPi.GPIO as GPIO
-from scripts.settings import TEMP_HUM_API, GPIO_DHT11, TEMP_HUM_STORAGE, GPIO_FAN, FAN_HIGH_TEMP, \
-    FAN_LOW_TEMP, FAN_ENABLE_TIME
+from loguru import logger
+from scripts.settings import TEMP_HUM_API, GPIO_DHT11, TEMP_HUM_STORAGE, GPIO_FAN, FAN_HIGH_TEMP, FAN_LOW_TEMP, \
+    FAN_ENABLE_TIME, ENABLE_FAN, ENABLE_PI_INFO, ENABLE_DHT11, CYCLE_FAN, CYCLE_INFO, CYCLE_DHT11
 from .redis_conn import RedisClient
 
 sensor = Adafruit_DHT.DHT11
+
+fan_process, info_process, dht11_process = None, None, None
 
 
 class Pi:
@@ -24,16 +29,17 @@ class Pi:
         self.pi_info = {}
 
     def dht11(self):
-        humidity, temperature = Adafruit_DHT.read_retry(sensor, GPIO_DHT11)
-        result = False
-        if humidity is not None and temperature is not None:
-            print(time.ctime(), 'Temp={0:0.1f}*C,Humidity={1:0.1f}%'.format(temperature, humidity))
-            self.redis.hset('house_temp_hum', mapping={'temp': temperature, 'hum': humidity})
-            if TEMP_HUM_STORAGE:
-                result = requests.post(url=TEMP_HUM_API, data={"temperature": temperature, "humidity": humidity}).text
-            if result == 'ok':
-                result = True
-        return result
+        return Adafruit_DHT.read_retry(sensor, GPIO_DHT11)
+        # humidity, temperature = Adafruit_DHT.read_retry(sensor, GPIO_DHT11)
+        # result = False
+        # if humidity is not None and temperature is not None:
+        #     print(time.ctime(), 'Temp={0:0.1f}*C,Humidity={1:0.1f}%'.format(temperature, humidity))
+        #     self.redis.hset('house_temp_hum', mapping={'temp': temperature, 'hum': humidity})
+        #     if TEMP_HUM_STORAGE:
+        #         result = requests.post(url=TEMP_HUM_API, data={"temperature": temperature, "humidity": humidity}).text
+        #     if result == 'ok':
+        #         result = True
+        # return result
 
     def fan(self, pin, operate='off'):
         GPIO.setwarnings(False)
@@ -43,17 +49,6 @@ class Pi:
             GPIO.output(pin, 0)
         else:
             GPIO.output(pin, 1)
-
-    def run_fan(self):
-        while True:
-            time.sleep(0.5)
-            hour = time.struct_time(time.localtime()).tm_hour
-            temp = float(self.get_cpu_temperature())
-            print(hour, temp)
-            if temp >= FAN_HIGH_TEMP and FAN_ENABLE_TIME[0] < hour < FAN_ENABLE_TIME[1]:
-                self.fan(GPIO_FAN, 'on')
-            if temp <= FAN_LOW_TEMP:
-                self.fan(GPIO_FAN, 'off')
 
     def get_pi_ip(self):
         """
@@ -120,6 +115,110 @@ class Pi:
     # Index 1: used disk space
     # Index 2: remaining disk space
     # Index 3: percentage of disk used
+
+
+class PiRun(object):
+    def __init__(self):
+        self.pi = Pi()
+
+    def run_fan(self):
+        """
+        每一段时间获取一次cpu温度，超过阈值则运行风扇，低于阈值停止风扇
+        """
+        if not ENABLE_FAN:
+            logger.info('Fan not enabled, exit')
+            return
+        while True:
+            hour = time.struct_time(time.localtime()).tm_hour
+            temp = float(self.pi.get_cpu_temperature())
+            if temp >= FAN_HIGH_TEMP and FAN_ENABLE_TIME[0] < hour < FAN_ENABLE_TIME[1]:
+                self.pi.fan(GPIO_FAN, 'on')
+            if temp <= FAN_LOW_TEMP:
+                self.pi.fan(GPIO_FAN, 'off')
+            time.sleep(CYCLE_FAN)
+
+    def run_pi_info(self):
+        """
+        每隔一段时间获取一次pi的信息，并写入到redis
+        """
+        if not ENABLE_PI_INFO:
+            logger.info('Pi info not enabled, exit')
+            return
+        while True:
+            pi_info = self.pi.pi_info_summary()
+            ram_state = pi_info.get('ram_state')
+            disk_state = pi_info.get('disk_state')
+            pi_info['ram_state'] = json.dumps(ram_state)
+            pi_info['disk_state'] = json.dumps(disk_state)
+            self.pi.redis.hmset('pi_info', pi_info)  # 存入redis
+            time.sleep(CYCLE_INFO)
+
+    def run_dht11(self):
+        """
+        每隔一段时间获取一次室内温湿度
+        """
+        if not ENABLE_DHT11:
+            logger.info('DHT11 not enabled, exit')
+            return
+        while True:
+            logger.info('Get indoor humidity and temperature.')
+            humidity, temperature = self.pi.dht11()
+            sleep = CYCLE_DHT11
+            if humidity is not None and temperature is not None:
+                logger.info('Temp={0:0.1f}*C,Humidity={1:0.1f}%'.format(temperature, humidity))
+                self.pi.redis.hset('house_temp_hum', mapping={'temp': temperature, 'hum': humidity})  # 存入redis
+                if TEMP_HUM_STORAGE:
+                    result = requests.post(url=TEMP_HUM_API,
+                                           data={"temperature": temperature, "humidity": humidity}).text
+                    logger.info(f'Temperature and humidity storage success.')
+                    if result != 'ok':
+                        sleep = 1
+            else:
+                sleep = 1
+            time.sleep(sleep)
+
+    def run(self):
+        global fan_process, info_process, dht11_process
+        try:
+            logger.info('starting pi process...')
+            if ENABLE_FAN:
+                fan_process = multiprocessing.Process(
+                    target=self.run_fan)
+                logger.info(f'starting fan control, pid {fan_process.pid}...')
+                fan_process.start()
+
+            if ENABLE_PI_INFO:
+                info_process = multiprocessing.Process(
+                    target=self.run_pi_info)
+                logger.info(f'starting get pi information, pid {info_process.pid}...')
+                info_process.start()
+
+            if ENABLE_DHT11:
+                dht11_process = multiprocessing.Process(
+                    target=self.run_dht11)
+                logger.info(f'starting get indoor temperature and humidity, pid {dht11_process.pid}...')
+                dht11_process.start()
+
+            fan_process and fan_process.join()
+            info_process and info_process.join()
+            dht11_process and dht11_process.join()
+        except KeyboardInterrupt:
+            logger.info('received keyboard interrupt signal')
+            fan_process and fan_process.terminate()
+            info_process and info_process.terminate()
+            dht11_process and dht11_process.terminate()
+        finally:
+            # must call join method before calling is_alive
+            fan_process and fan_process.join()
+            info_process and info_process.join()
+            dht11_process and dht11_process.join()
+            logger.info(
+                f'Fan control is {"alive" if fan_process.is_alive() else "dead"}')
+            logger.info(
+                f'Get pi information is {"alive" if info_process.is_alive() else "dead"}')
+            logger.info(
+                f'Get indoor temperature and humidity is {"alive" if dht11_process.is_alive() else "dead"}')
+            logger.info('Pi terminated')
 
 
 if __name__ == '__main__':
