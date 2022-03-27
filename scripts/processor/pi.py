@@ -14,7 +14,7 @@ import multiprocessing
 import Adafruit_DHT
 import RPi.GPIO as GPIO
 from loguru import logger
-from scripts.settings import TEMP_HUM_API, GPIO_DHT11, TEMP_HUM_STORAGE, GPIO_FAN, FAN_HIGH_TEMP, FAN_LOW_TEMP, \
+from settings import TEMP_HUM_API, GPIO_DHT11, TEMP_HUM_STORAGE, GPIO_FAN, FAN_HIGH_TEMP, FAN_LOW_TEMP, \
     FAN_ENABLE_TIME, ENABLE_FAN, ENABLE_PI_INFO, ENABLE_DHT11, CYCLE_FAN, CYCLE_INFO, CYCLE_DHT11
 from .redis_conn import RedisClient
 
@@ -223,5 +223,5 @@ class PiRun(object):
 
 if __name__ == '__main__':
     pi = Pi()
-    info = pi.pi_info_summary()
+    info = pi.dht11()
     print(info)
