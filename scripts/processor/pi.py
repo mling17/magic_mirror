@@ -29,7 +29,8 @@ class Pi:
         self.pi_info = {}
 
     def dht11(self):
-        return Adafruit_DHT.read_retry(sensor, GPIO_DHT11)
+        reuslt = Adafruit_DHT.read_retry(sensor, GPIO_DHT11)
+        return reuslt
         # humidity, temperature = Adafruit_DHT.read_retry(sensor, GPIO_DHT11)
         # result = False
         # if humidity is not None and temperature is not None:
@@ -128,13 +129,19 @@ class PiRun(object):
         if not ENABLE_FAN:
             logger.info('Fan not enabled, exit')
             return
+        fan_is_run = True
         while True:
             hour = time.struct_time(time.localtime()).tm_hour
             temp = float(self.pi.get_cpu_temperature())
+            
             if temp >= FAN_HIGH_TEMP and FAN_ENABLE_TIME[0] < hour < FAN_ENABLE_TIME[1]:
                 self.pi.fan(GPIO_FAN, 'on')
-            if temp <= FAN_LOW_TEMP:
+                logger.info('Fan is running...')
+                fan_is_run = True
+            if temp <= FAN_LOW_TEMP and fan_is_run:
                 self.pi.fan(GPIO_FAN, 'off')
+                logger.info('Fan is stopped.')
+                fan_is_run = False
             time.sleep(CYCLE_FAN)
 
     def run_pi_info(self):
@@ -150,6 +157,7 @@ class PiRun(object):
             disk_state = pi_info.get('disk_state')
             pi_info['ram_state'] = json.dumps(ram_state)
             pi_info['disk_state'] = json.dumps(disk_state)
+            logger.info(f'{pi_info}')
             self.pi.redis.hmset('pi_info', pi_info)  # 存入redis
             time.sleep(CYCLE_INFO)
 
@@ -170,14 +178,16 @@ class PiRun(object):
                 if TEMP_HUM_STORAGE:
                     try:
                         result = requests.post(url=TEMP_HUM_API,
-                                               data={"temperature": temperature, "humidity": humidity}).text
+                                               data={"temperature": temperature, "humidity": humidity}, timeout=1).text
                         logger.info(f'Temperature and humidity storage success.')
                         if result != 'ok':
                             sleep = 1
                     except Exception as e:
+                        logger.error(e)
                         sleep = 1
             else:
                 sleep = 1
+            print(f'dht11 sleep time {sleep}s')
             time.sleep(sleep)
 
     def run(self):
