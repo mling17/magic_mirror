@@ -27,8 +27,8 @@ LOCATION = env.str('PI_LOCATION', '潍坊')
 
 # enable switch
 ENABLE_DHT11 = True
-ENABLE_FAN = True
-ENABLE_PI_INFO = True
+ENABLE_FAN = False
+ENABLE_PI_INFO = False
 # dht11
 GPIO_DHT11 = 17
 TEMP_HUM_API = "http://127.0.0.1:8000/temp_hum/"
