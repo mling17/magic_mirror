@@ -10,7 +10,9 @@ import time
 import socket
 import requests
 import Adafruit_DHT
-from magic_mirror.scripts.settings import TEMP_HUM_API, GPIO_DHT11, TEMP_HUM_STORAGE
+import RPi.GPIO as GPIO
+from scripts.settings import TEMP_HUM_API, GPIO_DHT11, TEMP_HUM_STORAGE, GPIO_FAN, FAN_HIGH_TEMP, \
+    FAN_LOW_TEMP, FAN_ENABLE_TIME
 from ..storages.redis import RedisClient
 
 sensor = Adafruit_DHT.DHT11
@@ -33,8 +35,25 @@ class Pi:
                 result = True
         return result
 
-    def fan(self):
-        pass
+    def fan(self, pin, operate='off'):
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(pin, GPIO.OUT)
+        if operate == 'off':
+            GPIO.output(pin, 0)
+        else:
+            GPIO.output(pin, 1)
+
+    def run_fan(self):
+        while True:
+            time.sleep(0.5)
+            hour = time.struct_time(time.localtime()).tm_hour
+            temp = float(self.get_cpu_temperature())
+            print(hour, temp)
+            if temp >= FAN_HIGH_TEMP and FAN_ENABLE_TIME[0] < hour < FAN_ENABLE_TIME[1]:
+                self.fan(GPIO_FAN, 'on')
+            if temp <= FAN_LOW_TEMP:
+                self.fan(GPIO_FAN, 'off')
 
     def get_pi_ip(self):
         """
@@ -52,11 +71,6 @@ class Pi:
     def get_cpu_use(self):
         return (str(os.popen("top -n1 | awk '/Cpu\(s\):/ {print $2}'").readline().strip()))
 
-    # Return information about disk space as a list (unit included)
-    # Index 0: total disk space
-    # Index 1: used disk space
-    # Index 2: remaining disk space
-    # Index 3: percentage of disk used
     def get_cpu_temperature(self):
         res = os.popen('vcgencmd measure_temp').readline()
         return res.replace("temp=", "").replace("'C\n", "")
@@ -101,8 +115,11 @@ class Pi:
         self.pi_info['ip'] = self.get_pi_ip()
         return self.pi_info
 
-    def ws2812(self):
-        pass
+    # Return information about disk space as a list (unit included)
+    # Index 0: total disk space
+    # Index 1: used disk space
+    # Index 2: remaining disk space
+    # Index 3: percentage of disk used
 
 
 if __name__ == '__main__':

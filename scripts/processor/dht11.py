@@ -1,7 +1,7 @@
 import Adafruit_DHT
 import requests
 import time
-from magic_mirror.scripts.settings import GPIO_DHT11, TEMP_HUM_API
+from scripts.settings import GPIO_DHT11, TEMP_HUM_API
 
 sensor = Adafruit_DHT.DHT11
 
