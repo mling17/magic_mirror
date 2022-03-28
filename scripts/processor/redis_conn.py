@@ -23,7 +23,6 @@ class RedisClient(object):
         if connection_string:
             self.db = redis.StrictRedis.from_url(connection_string, decode_responses=True, **kwargs)
         else:
-            print(1111)
             self.db = redis.StrictRedis(
                 host=host, port=port, password=password, db=db, decode_responses=True, **kwargs)
 

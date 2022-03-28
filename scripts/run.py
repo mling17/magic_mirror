@@ -1,4 +1,4 @@
-from processor.pi import PiRun
+from scheduler import Scheduler
 
 if __name__ == '__main__':
-    PiRun().run()
+    Scheduler().run()

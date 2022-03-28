@@ -126,15 +126,13 @@ class PiRun(object):
         """
         每一段时间获取一次cpu温度，超过阈值则运行风扇，低于阈值停止风扇
         """
-        if not ENABLE_FAN:
-            logger.info('Fan not enabled, exit')
-            return
+
         fan_is_run = True
         while True:
             hour = time.struct_time(time.localtime()).tm_hour
             temp = float(self.pi.get_cpu_temperature())
-            
-            if temp >= FAN_HIGH_TEMP and FAN_ENABLE_TIME[0] < hour < FAN_ENABLE_TIME[1]:
+
+            if temp >= FAN_HIGH_TEMP and (not bool(FAN_ENABLE_TIME[1]) or FAN_ENABLE_TIME[0] < hour < FAN_ENABLE_TIME[1]):
                 self.pi.fan(GPIO_FAN, 'on')
                 logger.info('Fan is running...')
                 fan_is_run = True
@@ -148,9 +146,6 @@ class PiRun(object):
         """
         每隔一段时间获取一次pi的信息，并写入到redis
         """
-        if not ENABLE_PI_INFO:
-            logger.info('Pi info not enabled, exit')
-            return
         while True:
             pi_info = self.pi.pi_info_summary()
             ram_state = pi_info.get('ram_state')
@@ -165,9 +160,6 @@ class PiRun(object):
         """
         每隔一段时间获取一次室内温湿度
         """
-        if not ENABLE_DHT11:
-            logger.info('DHT11 not enabled, exit')
-            return
         while True:
             logger.info('Get indoor humidity and temperature.')
             humidity, temperature = self.pi.dht11()
@@ -200,18 +192,22 @@ class PiRun(object):
                     target=self.run_fan)
                 logger.info(f'starting fan control, pid {fan_process.pid}...')
                 fan_process.start()
-
+            if not ENABLE_FAN:
+                logger.info('Fan not enabled, exit')
             if ENABLE_PI_INFO:
                 info_process = multiprocessing.Process(
                     target=self.run_pi_info)
                 logger.info(f'starting get pi information, pid {info_process.pid}...')
                 info_process.start()
-
+            else:
+                logger.info('Pi info not enabled, exit')
             if ENABLE_DHT11:
                 dht11_process = multiprocessing.Process(
                     target=self.run_dht11)
                 logger.info(f'starting get indoor temperature and humidity, pid {dht11_process.pid}...')
                 dht11_process.start()
+            if not ENABLE_DHT11:
+                logger.info('DHT11 not enabled, exit')
 
             fan_process and fan_process.join()
             info_process and info_process.join()
@@ -227,12 +223,11 @@ class PiRun(object):
             info_process and info_process.join()
             dht11_process and dht11_process.join()
             logger.info(
-                f'Fan control is {"alive" if fan_process.is_alive() else "dead"}')
+                f'Fan control process is {"alive" if fan_process is not None and fan_process.is_alive() else "dead"}')
             logger.info(
-                f'Get pi information is {"alive" if info_process.is_alive() else "dead"}')
+                f'Get pi information process is {"alive" if fan_process is not None and info_process.is_alive() else "dead"}')
             logger.info(
-                f'Get indoor temperature and humidity is {"alive" if dht11_process.is_alive() else "dead"}')
-            logger.info('Pi terminated')
+                f'Get indoor temperature and humidity process is {"alive" if dht11_process is not None and dht11_process.is_alive() else "dead"}')
 
 
 if __name__ == '__main__':
