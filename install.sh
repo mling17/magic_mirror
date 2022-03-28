@@ -1,9 +1,9 @@
 #!/bin/bash -e
 # update repo
-sudo apt update -y
-sudo apt upgrade -y
+#sudo apt update -y
+#sudo apt upgrade -y
 # install app
-sudo apt install -y redis
+#sudo apt install -y redis
 # 创建pip配置文件
 if [ ! -d "/home/pi/.pip/" ];then
   mkdir /home/pi/.pip/
