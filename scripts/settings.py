@@ -4,6 +4,7 @@ from environs import Env
 
 # from loguru import logger
 
+
 env = Env()
 env.read_env()
 
@@ -46,3 +47,8 @@ GPIO_FAN = 26  # 风扇GPIO引脚
 FAN_HIGH_TEMP = 65  # 风扇散热温度
 FAN_LOW_TEMP = 55  # 风扇停止温度
 FAN_ENABLE_TIME = (6, 22)  # 风扇使能时间段，范围0-23，(0,0)表示全天
+# server
+API_HOST = env.str('API_HOST', '0.0.0.0')
+API_PORT = env.int('API_PORT', 5555)
+API_THREADED = env.bool('API_THREADED', True)
+IS_DEV = True

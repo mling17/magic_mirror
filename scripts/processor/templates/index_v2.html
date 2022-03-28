@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="{% static '/css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/weather-icons.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/weather.css' %}">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <!--<link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">-->
+    <style>
+        .lunar {
+            color: var(--color-text);
+            font-family: sans-serif;
+            font-weight: 400;
+            font-size: 20px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            margin-top: -10px;
+        }
+
+        .city {
+            display: inline-block;
+            margin-left: 5px;
+            font-size: 20px
+        }
+
+        .temp .icon {
+            font-size: 1.0rem;
+        }
+
+        .inside .fa {
+            padding: 0 10px 0 15px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body class="blackBody">
+<div class="container" style="display: block;">
+    <div class="top left" style="position: relative">
+        <div id="module_2_clock" class="module clock">
+            <div id="myclock" class="clock">
+                <div class="date normal small"></div>
+                <div id="clock">
+
+                    <p class="time bright large light bright"
+                       style="text-shadow: 0 0 20px #0aafe6, 0 0 20px rgb(10 175 230 / 0%);font-size: 90px;display: inline-block;font-weight: 700;font-family: sans-serif"></p>
+                    <span style="margin-left: -10px;font-size: 30px;font-weight:500" class="dimmed"></span>
+                    <div class="lunar" style="">
+                        <span class="ganzhi"></span>
+                        <span class="yueri" style="margin-left: 10px"></span>
+                        <span class="jieri" style="margin-left: 10px"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="module_3_calendar" class="module calendar calendar"
+             style="transition: opacity 1s ease 0s; opacity: 1; position: absolute;top: 180px;width: 275px">
+            <header class="module-header" style="display: block;font-size: 0.2rem;padding-bottom: 5px">今日事项</header>
+            <div class="module-content">
+                <table style="font-size: 0.2rem;">
+                    <tr class="normal event">
+                        <td class="symbol align-right "><span class="fa fa-fw fa-calendar-check-o"></span></td>
+                        <td class="title bright ">常回家看看回家看看常回家看看回家</td>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="top right">
+        <div class="windsun small dimmed">
+            <span class="wind"></span>
+            <span class="wi wi-strong-wind xdimmed"></span>
+            <span class="wi windpower" style="letter-spacing: 5px;"></span>
+            <span class="fa fa-tint " style="margin-left: 10px"></span>
+            <span style="display: inline-block;margin-left: 5px;font-size: 20px" class="humidity-padding"></span>
+            <span class="fa fa-home "></span>
+            <span class='city' style=""></span>
+        </div>
+        <div class="temp">
+            <div class="outside">
+                <span class="icon dimmed wi"></span><span class="weather-text" style="font-size: 20px;"></span>
+                <span class="temperature"></span><sup style="display: none">℃</sup>
+            </div>
+            <div class="inside" style="font-size: 20px">
+                <span>室内</span>
+                <span class="fa fa-thermometer-three-quarters"></span>
+                <span>23.1</span>
+                <span class="fa fa-tint"></span>
+                <span class="humidity">50%</span>
+            </div>
+        </div>
+        <div class="forecast small dimmed" style="display: none;">
+            <table class="forecast-table">
+                <tbody>
+                <tr>
+                    <td style="opacity:1" class="day">Mon</td>
+                    <td style="opacity:1" class="icon-small wi-rain"></td>
+                    <td style="opacity:1" class="temp-max">26.2</td>
+                    <td style="opacity:1" class="temp-min">26.0</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<div class="lower-third center-hor">
+    <div class="compliment light interactive">帅爆了</div>
+</div>
+
+</body>
+<script type="text/javascript" src="{% static 'js/jquery-2.1.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/clock.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/interactive.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/weather.js' %}"></script>
+
+
+</html>
