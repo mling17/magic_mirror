@@ -77,6 +77,7 @@ class DateInfo:
         #     time.sleep(1)
         self.info()
 
+
 if __name__ == '__main__':
     obj = DateInfo()
     obj.main()
