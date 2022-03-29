@@ -37,6 +37,7 @@ CYCLE_INFO = 10  # 获取pi信息的频率
 CYCLE_DHT11 = 60 * 30  # 获取室内温湿度的频率
 CYCLE_FAN = 10  # 风扇检测频率
 CYCLE_WEATHER = 60 * 30  # 获取天气信息的频率
+CYCLE_LUNAR = 1  # 农历日期更新频率
 # server
 API_HOST = env.str('API_HOST', '0.0.0.0')
 API_PORT = env.int('API_PORT', 5555)
