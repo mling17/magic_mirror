@@ -86,7 +86,7 @@ class Scheduler(object):
             if ENABLE_LUNAR:
                 lunar_process = multiprocessing.Process(target=self.run_lunar)
                 logger.info(f'starting lunar module, pid {lunar_process.pid}...')
-                weather_process.start()
+                lunar_process.start()
             else:
                 logger.info('Weather information module is disable.')
 
