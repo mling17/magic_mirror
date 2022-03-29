@@ -27,3 +27,15 @@ fi
 echo -e '[Desktop Entry]
 Type=Application
 Exec=chromium-browser  --disable-popup-blocking --no-first-run --disable-desktop-notifications  --kiosk "http://127.0.0.1:5555"'> /home/pi/.config/autostart/my.desktop # todo port
+
+# run
+echo -e '[Desktop Entry]
+Name=magic_mirror
+Comment=magic mirror launch
+Exec=python3 /home/pi/magic_mirror/run.py
+Terminal=true
+MultipleArgs=False
+Type=Application
+Categories=Application;Development;
+StartupNotify=true
+'>/home/pi/.config/autostart/magic_mirror.desktop
