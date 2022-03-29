@@ -22,9 +22,8 @@ export PI_LOCATION='莒南'
 # migrate
 # 开机启动浏览器
 if [ ! -d "/home/pi/.config/autostart" ];then
-  mkdir -p /home/pi/.pip/autostart
+  mkdir -p /home/pi/.config/autostart
 fi
-echo -e "[Desktop Entry]
+echo -e '[Desktop Entry]
 Type=Application
-Exec=chromium-browser  --disable-popup-blocking --no-first-run --disable-desktop-notifications  --kiosk "http://127.0.0.1:5555"
-" > /home/pi/.pip/autostart/my.desktop # todo port
+Exec=chromium-browser  --disable-popup-blocking --no-first-run --disable-desktop-notifications  --kiosk "http://127.0.0.1:5555"'> /home/pi/.config/autostart/my.desktop # todo port
