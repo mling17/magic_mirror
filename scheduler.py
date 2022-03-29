@@ -3,12 +3,11 @@ from loguru import logger
 from processor.pi import PiRun
 from processor.get_weather import Weather
 from processor.server import app
-from settings import ENABLE_PI, ENABLE_WEATHER, ENABLE_SERVER, APP_PROD_METHOD_GEVENT, APP_PROD_METHOD_TORNADO, \
-    APP_PROD_METHOD_MEINHELD, IS_PROD,APP_PROD_METHOD,API_HOST,API_PORT,API_THREADED
+from processor.lunar_festival import DateInfo
+from settings import ENABLE_PI, ENABLE_WEATHER, ENABLE_SERVER, ENABLE_LUNAR, APP_PROD_METHOD_GEVENT, \
+    APP_PROD_METHOD_TORNADO, APP_PROD_METHOD_MEINHELD, IS_PROD, APP_PROD_METHOD, API_HOST, API_PORT, API_THREADED
 
-pi_process, weather_process = None, None
-
-
+pi_process, weather_process, lunar_process, server_process = None, None, None, None
 
 
 class Scheduler(object):
@@ -20,18 +19,15 @@ class Scheduler(object):
         PiRun().run()
 
     def run_weather(self):
-        if ENABLE_WEATHER:
-            Weather().run()
-        else:
-            logger.info('Weather information module is disable.')
+        Weather().run()
+
+    def run_lunar(self):
+        DateInfo().run()
 
     def run_server(self):
         """
         run server for api
         """
-        if not ENABLE_SERVER:
-            logger.info('server not enabled, exit')
-            return
         if IS_PROD:
             if APP_PROD_METHOD == APP_PROD_METHOD_GEVENT:
                 try:
@@ -70,28 +66,32 @@ class Scheduler(object):
             app.run(host=API_HOST, port=API_PORT, threaded=API_THREADED)
 
     def run(self):
-        global pi_process, weather_process, server_process
+        global pi_process, weather_process, lunar_process, server_process
         try:
             logger.info('starting magic mirror...')
             if ENABLE_PI:
-                pi_process = multiprocessing.Process(
-                    target=self.run_pi)
+                pi_process = multiprocessing.Process(target=self.run_pi)
                 logger.info(f'starting tester, pid {pi_process.pid}...')
                 pi_process.start()
             else:
                 logger.info('Pi functions module is disable.')
 
             if ENABLE_WEATHER:
-                weather_process = multiprocessing.Process(
-                    target=self.run_weather)
+                weather_process = multiprocessing.Process(target=self.run_weather)
                 logger.info(f'starting weather module, pid {weather_process.pid}...')
                 weather_process.start()
             else:
                 logger.info('Weather information module is disable.')
 
+            if ENABLE_LUNAR:
+                lunar_process = multiprocessing.Process(target=self.run_lunar)
+                logger.info(f'starting lunar module, pid {lunar_process.pid}...')
+                weather_process.start()
+            else:
+                logger.info('Weather information module is disable.')
+
             if ENABLE_SERVER:
-                server_process = multiprocessing.Process(
-                    target=self.run_server)
+                server_process = multiprocessing.Process(target=self.run_server)
                 logger.info(f'starting server, pid {server_process.pid}...')
                 server_process.start()
             else:
@@ -99,23 +99,28 @@ class Scheduler(object):
 
             pi_process and pi_process.join()
             weather_process and weather_process.join()
+            lunar_process and lunar_process.join()
             server_process and server_process.join()
         except KeyboardInterrupt:
             logger.info('received keyboard interrupt signal')
             pi_process and pi_process.terminate()
             weather_process and weather_process.terminate()
+            lunar_process and lunar_process.terminate()
             server_process and server_process.terminate()
         finally:
             # must call join method before calling is_alive
             pi_process and pi_process.join()
             weather_process and weather_process.join()
+            lunar_process and lunar_process.join()
             server_process and server_process.join()
             logger.info(
-                f'tester is {"alive" if pi_process and pi_process.is_alive() else "dead"}')
+                f'pi_process is {"alive" if pi_process and pi_process.is_alive() else "dead"}')
             logger.info(
-                f'getter is {"alive" if weather_process and weather_process.is_alive() else "dead"}')
+                f'weather_process is {"alive" if weather_process and weather_process.is_alive() else "dead"}')
             logger.info(
-                f'server is {"alive" if server_process and server_process.is_alive() else "dead"}')
+                f'lunar_process is {"alive" if lunar_process and lunar_process.is_alive() else "dead"}')
+            logger.info(
+                f'server_process is {"alive" if server_process and server_process.is_alive() else "dead"}')
 
 
 if __name__ == '__main__':

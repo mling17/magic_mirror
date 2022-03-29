@@ -31,6 +31,7 @@ ENABLE_DHT11 = True
 ENABLE_FAN = True
 ENABLE_PI_INFO = True
 ENABLE_SERVER = True
+ENABLE_LUNAR = True
 # cycle time set.
 CYCLE_INFO = 10  # 获取pi信息的频率
 CYCLE_DHT11 = 60 * 30  # 获取室内温湿度的频率

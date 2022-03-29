@@ -88,14 +88,9 @@ class DateInfo:
             self.redis.expire('day_info', ex)
 
     def run(self):
-        # while True and not self.flag and not first:
-        #     nt = datetime.datetime.now()
-        #     # print(nt.minute, nt.second, sep=":")
-        #     if nt.minute == 0 and nt.second == 0:
-        #         self.flag = True
-        #         break
-        #     time.sleep(1)
-        self.info()
+        while True:
+            self.info()
+            time.sleep(10)
 
 
 if __name__ == '__main__':
