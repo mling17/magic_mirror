@@ -12,7 +12,7 @@ import json
 import redis
 import datetime
 from flask import Flask, request, render_template, jsonify, g
-from tools.weather_table import weather_table, wind_direct
+from processor.tools.weather_table import weather_table, wind_direct
 
 # from .redis_conn import RedisClient
 # from ..settings import API_HOST, API_PORT, API_THREADED, IS_DEV
