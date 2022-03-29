@@ -1,18 +1,13 @@
 """
-apis:
-完成：http://127.0.0.1:8000/
-完成：http://127.0.0.1:8000/weather/
-完成：http://127.0.0.1:8000/forecast/
-完成GET：http://127.0.0.1:8000/temp_hum/   #GET,POST
-http://127.0.0.1:8000/todo/
-完成：http://127.0.0.1:8000/pi_info/
-完成：http://127.0.0.1:8000/lunar/
+未完成：
+http://127.0.0.1:8000/temp_hum/   # POST方法未完成
+http://127.0.0.1:8000/todo/  # 读取mysql
 """
 import json
 import redis
 import datetime
 from flask import Flask, request, render_template, jsonify, g
-from tools.weather_table import weather_table, wind_direct
+from processor.tools.weather_table import weather_table, wind_direct
 
 # from .redis_conn import RedisClient
 # from ..settings import API_HOST, API_PORT, API_THREADED, IS_DEV
@@ -209,7 +204,7 @@ def todo():
     todo_list = {'title': 'a', 'date': '2022-03-29', 'period': 0, 'fix_day': False}
     period_todo = {'title': 'a', 'date': '2022-03-29', 'period': 1, 'fix_day': False}
     return jsonify([])
-    return jsonify([todo_list,period_todo])
+    return jsonify([todo_list, period_todo])
     # ret_list = []
     # for item in period_todo:
     #     title = item.title

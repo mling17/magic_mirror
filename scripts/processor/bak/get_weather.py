@@ -2,7 +2,7 @@ import time
 import requests
 from loguru import logger
 from settings import LOCATION, CYCLE_WEATHER
-from .redis_conn import RedisClient
+from scripts.processor.redis_conn import RedisClient
 
 
 class Weather(object):
