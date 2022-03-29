@@ -36,14 +36,18 @@ function lunar() {
         url: '/lunar/',
         success: function (res) {
             //console.log(res)
+            if (res.status == 0) {
+                console.log('lunar no data')
+                return
+            }
             $('.ganzhi').text(res.ganzhi + " " + res.shengxiao + '年')
             var yueri = res.lunarMonth + '月' + res.lunarDay
             $('.yueri').text(yueri)
-	    if (res.remark){
-            $('.jieri').text(res.remark)
-	    }else{
-		$('.jieri').addClass('hide');
-	    }
+            if (res.remark) {
+                $('.jieri').text(res.remark)
+            } else {
+                $('.jieri').addClass('hide');
+            }
         },
         error: function () {
 

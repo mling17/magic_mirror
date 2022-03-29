@@ -27,7 +27,6 @@ function updateToDo() {
                     opacity_value -= 0.2;
                 }
             }
-
         },
         error: function (err) {
             console.log(err)

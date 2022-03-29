@@ -10,6 +10,7 @@ http://127.0.0.1:8000/todo/
 """
 import json
 import redis
+import datetime
 from flask import Flask, request, render_template, jsonify, g
 from tools.weather_table import weather_table, wind_direct
 
@@ -139,12 +140,17 @@ def get_count():
     """
     r = get_conn()
     if request.method == 'GET':
-        data = r.hgetall('house_temp_hum')
-        ret_dict = {}
-        for k, v in data.items():
-            k = k.decode('utf-8')
-            v = v.decode('utf-8')
-            ret_dict[k] = v
+        ret_dict = {'status': 1}
+        try:
+            data = r.hgetall('house_temp_hum')
+            if not data:
+                ret_dict['status'] = 0
+            for k, v in data.items():
+                k = k.decode('utf-8')
+                v = v.decode('utf-8')
+                ret_dict[k] = v
+        except Exception as e:
+            ret_dict['status'] = 0
         return jsonify(ret_dict)
 
 
@@ -166,12 +172,14 @@ def pi_info():
 @app.route('/lunar/')
 def lunar():
     """
-    树莓派运行信息
+    农历信息
+    status，0错误/无数据
     """
     r = get_conn()
     day_info = r.hgetall('day_info')
-    day_info_dict = {}
+    day_info_dict = {'status': 1}
     if not day_info:
+        day_info_dict['status'] = 0
         return jsonify(day_info_dict)
     for k, v in day_info.items():
         # print(k.decode('utf-8'), type(v.decode('utf-8')))
@@ -190,6 +198,38 @@ def lunar():
     if is_holiday is False:
         day_info_dict['holiday'] = ''
     return jsonify(day_info_dict)
+
+
+@app.route('/todo/')
+def todo():
+    today = datetime.date.today()
+    day = today.day
+    # todo_list = models.ToDo.objects.filter(date__day=day).values('title', 'date', 'period', 'fix_day')
+    # period_todo = models.ToDo.objects.filter(period__gt=0)
+    todo_list = {'title': 'a', 'date': '2022-03-29', 'period': 0, 'fix_day': False}
+    period_todo = {'title': 'a', 'date': '2022-03-29', 'period': 1, 'fix_day': False}
+    return jsonify([])
+    return jsonify([todo_list,period_todo])
+    # ret_list = []
+    # for item in period_todo:
+    #     title = item.title
+    #     date = item.date
+    #     fix_day = item.fix_day
+    #     period = item.period
+    #     days = (date - today).days  # 间隔天数
+    #     if not fix_day and days % period == 0:  # 间隔日期执行
+    #         ret_list.insert(0, title)
+    # for item in todo_list:
+    #     title = item['title']
+    #     date = item['date']
+    #     fix_day = item['fix_day']
+    #     if fix_day:  # 固定日期执行
+    #         if date.month <= today.month and date.year <= today.year:
+    #             ret_list.insert(0, title)
+    #     if today.day == date.day and date.month == today.month and date.year == today.year:  # 执行一次
+    #         if title not in ret_list:
+    #             ret_list.insert(0, title)
+    # return jsonify(ret_list)
 
 
 if __name__ == '__main__':

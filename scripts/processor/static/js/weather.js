@@ -17,7 +17,7 @@ function updateWeather() {
             if (res.length !== 0) {
                 console.log(res)
                 $('.city').text(res.city);
-                $('.windpower').text(res.windpower).addClass(res.winddirection_icon);
+                $('.windpower').text(res.winddirection + res.windpower).addClass(res.winddirection_icon);
                 $('.humidity-padding').text(res.humidity + "%");
                 $('.temp .icon').removeClass(function (index, className) {
                     return (className.match(/(^|\s)wi-\S+/g) || []).join(' ');
@@ -42,9 +42,16 @@ function updateHouseTempHum() {
         dataType: 'json',
         url: '/temp_hum/',
         success: function (res) {
-            console.log(res);
-            $('.house_temperature').text(res.temp + '℃');
-            $('.house_humidity').text(res.hum + '%');
+            if (res.status == 0) {
+                console.log('asjlkdfjlaksdglkahs')
+                $('.inside').addClass('hide')
+                return
+            } else {
+                $('.inside').removeClass('hide')
+                $('.house_temperature').text(res.temp + '℃');
+                $('.house_humidity').text(res.hum + '%');
+            }
+
         },
         error: function (err) {
             console.log(err)
