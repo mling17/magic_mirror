@@ -178,9 +178,7 @@ class PiRun(object):
                         logger.error(e)
                         sleep = 1
             else:
-                print(f'err-->,hum:{humidity},temp:{temperature}')
                 sleep = 1
-            print(f'dht11 sleep time {sleep}s')
             time.sleep(sleep)
 
     def run(self):
