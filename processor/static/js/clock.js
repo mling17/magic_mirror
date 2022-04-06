@@ -40,13 +40,17 @@ function lunar() {
                 console.log('lunar no data')
                 return
             }
-            $('.ganzhi').text(res.ganzhi + " " + res.shengxiao + '年')
-            var yueri = res.lunarMonth + '月' + res.lunarDay
-            $('.yueri').text(yueri)
-            if (res.remark) {
-                $('.jieri').text(res.remark)
+            if (res.status == 2) {
+                $('.ganzhi').text(res.nongli)
             } else {
-                $('.jieri').addClass('hide');
+                $('.ganzhi').text(res.ganzhi + " " + res.shengxiao + '年')
+                var yueri = res.lunarMonth + '月' + res.lunarDay
+                $('.yueri').text(yueri)
+                if (res.remark) {
+                    $('.jieri').text(res.remark)
+                } else {
+                    $('.jieri').addClass('hide');
+                }
             }
         },
         error: function () {

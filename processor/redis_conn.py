@@ -24,7 +24,7 @@ class RedisClient(object):
             self.db = redis.StrictRedis.from_url(connection_string, decode_responses=False, **kwargs)
         else:
             self.db = redis.StrictRedis(
-                host=host, port=port, password=password, db=db, decode_responses=False, **kwargs)
+                host=host, port=port, password=password, db=db, decode_responses=True, **kwargs)
 
     # def add(self, proxy: Proxy, score=PROXY_SCORE_INIT) -> int:
     #     """

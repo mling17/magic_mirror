@@ -23,7 +23,7 @@ function getPiInfo() {
         dataType: 'json',
         url: '/pi_info/',
         success: function (res) {
-            if (res.length !== 0) {
+            if (res.status != 0) {
                 var ip = res['ip']
                 var cpu_used = res['cpu_used']
                 var cpu_temp = res['cpu_temp']
@@ -37,8 +37,13 @@ function getPiInfo() {
                 var disk_percent = disk_state['disk_percent']
                 pi_info = []
                 pi_info.push('ip:' + ip)
-                pi_info.push('cpu温度:' + cpu_temp + '℃' +'cpu使用率:' + cpu_used +"%")
-                pi_info.push('内存信息:' + ram_used + '/' + ram_total + '\t剩余:' + ram_free+"MB")
+                if (cpu_used) {
+                    cpu_used = cpu_used + '%'
+                    pi_info.push('cpu温度:' + cpu_temp + '℃' + 'cpu使用率:' + cpu_used)
+                } else {
+                    pi_info.push('cpu温度:' + cpu_temp + '℃')
+                }
+                pi_info.push('内存信息:' + ram_used + '/' + ram_total + '\t剩余:' + ram_free + "MB")
                 pi_info.push('存储信息:' + disk_used + '/' + disk_total + '\t使用率:' + disk_percent)
             }
         },

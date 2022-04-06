@@ -1,14 +1,17 @@
 """
 获取农历和节日
 """
-import time
-import requests
 import datetime
 import json
+import time
 from random import choice
 from urllib.parse import urlencode
-from settings import CYCLE_LUNAR
+
+import requests
+
 from constant import HEADERS
+from settings import CYCLE_LUNAR
+from utiles import get_rest_second
 from .redis_conn import RedisClient
 
 
@@ -67,7 +70,8 @@ class DateInfo:
                     for k, v in info_dict.items():
                         info_dict[k] = json.dumps(v, ensure_ascii=False)
                     self.redis.hmset('day_info', info_dict)
-            time.sleep(CYCLE_LUNAR)
+            else:
+                time.sleep(min(get_rest_second(), CYCLE_LUNAR))
 
 
 if __name__ == '__main__':

@@ -1,11 +1,17 @@
 import multiprocessing
 from loguru import logger
-from processor.pi import PiRun
+
 from processor.get_weather import Weather
 from processor.server import app
 from processor.lunar_festival import DateInfo
+from processor.redis_conn import RedisClient
 from settings import ENABLE_PI, ENABLE_WEATHER, ENABLE_SERVER, ENABLE_LUNAR, APP_PROD_METHOD_GEVENT, \
-    APP_PROD_METHOD_TORNADO, APP_PROD_METHOD_MEINHELD, IS_PROD, APP_PROD_METHOD, API_HOST, API_PORT, API_THREADED
+    APP_PROD_METHOD_TORNADO, APP_PROD_METHOD_MEINHELD, IS_PROD, APP_PROD_METHOD, API_HOST, API_PORT, API_THREADED, \
+    ENVIRONMENT
+if ENVIRONMENT.lower() == 'pi':
+    from processor.pi import PiRun
+else:
+    ENABLE_PI = False
 
 pi_process, weather_process, lunar_process, server_process = None, None, None, None
 
@@ -14,6 +20,11 @@ class Scheduler(object):
     """
     scheduler
     """
+
+    def __init__(self):
+        r = RedisClient().db
+        for key in r.keys():
+            r.delete(key)
 
     def run_pi(self):
         PiRun().run()

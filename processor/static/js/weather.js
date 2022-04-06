@@ -43,7 +43,6 @@ function updateHouseTempHum() {
         url: '/temp_hum/',
         success: function (res) {
             if (res.status == 0) {
-                console.log('asjlkdfjlaksdglkahs')
                 $('.inside').addClass('hide')
                 return
             } else {

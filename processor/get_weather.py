@@ -40,7 +40,8 @@ class Weather(object):
         url = 'https://www.weatherol.cn/api/home/getCurrAnd15dAnd24h?cityid=101120601'
         try:
             r = requests.get(url).json()
-            return r['data']['forecast15d'][2:5]
+            return r['data']
+            # return r['data']['forecast15d'][2:5]
         except Exception as e:
             logger.error(e)
             return {}
@@ -55,9 +56,14 @@ class Weather(object):
                 self.redis.hmset('weather_info', weather_info)
                 logger.info(
                     f'{weather_info["city"]}，{weather_info["weather"]}，{weather_info["winddirection"]}风{weather_info["windpower"]}级，气温{weather_info["temperature"]}℃，湿度{weather_info["humidity"]}%，更新时间{weather_info["reporttime"]}')
-            forecast = self.forecast()
+            weather_data = self.forecast()
+            current = weather_data['current']
+            nongli = current.get('nongLi').split()[-1]
+
+            self.redis.hset('day_info', 'nongLi', nongli)  # 如果获取农历API失效会使用此数据，前端不至于无显示
+            forecast = weather_data.get('forecast15d')
             if forecast:
-                for index, item in enumerate(forecast, 1):
+                for index, item in enumerate(forecast[2:5], 1):
                     self.redis.hmset('forecast_%s' % index, item)
                     logger.info(f'forecast_{index}--->{item}')
             time.sleep(CYCLE_WEATHER)

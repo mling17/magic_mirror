@@ -47,16 +47,11 @@ def weather():
     """
     r = get_conn()
     weather_info = r.hgetall('weather_info')
-    weather_info_dict = {}
-    for k, v in weather_info.items():
-        k = k.decode('utf-8')
-        v = v.decode('utf-8')
-        weather_info_dict[k] = v
-        if k == 'weather':
-            weather_info_dict['weather_icon'] = WEATHER_TABLE.get(v)
-        if k == 'winddirection':
-            weather_info_dict['winddirection_icon'] = WIND_DIRECT.get(v)
-    return jsonify(weather_info_dict)
+    weather = weather_info.get('weather')
+    weather_info['weather_icon'] = WEATHER_TABLE.get(weather)
+    winddirection = weather_info.get('winddirection')
+    weather_info['winddirection_icon'] = WEATHER_TABLE.get(winddirection)
+    return jsonify(weather_info)
 
 
 @app.route('/forecast/')
@@ -69,19 +64,11 @@ def forecast():
     forecast_2 = r.hgetall('forecast_2')
     forecast_3 = r.hgetall('forecast_3')
     forecast_list = [forecast_1, forecast_2, forecast_3]
-    forecast_info = []
-    for forecast_data in forecast_list:
-        forecast_info_dict = {}
-        for k, v in forecast_data.items():
-            k = k.decode('utf-8')
-            v = v.decode('utf-8')
-            forecast_info_dict[k] = v
-        forecast_info.append(forecast_info_dict)
-    return jsonify(forecast_info)
+    return jsonify(forecast_list)
 
 
 @app.route('/temp_hum/', methods=['GET', 'POST'])
-def get_count():
+def temp_hum():
     """
     上传或获取室内温湿度
     """
@@ -92,10 +79,8 @@ def get_count():
             data = r.hgetall('house_temp_hum')
             if not data:
                 ret_dict['status'] = 0
-            for k, v in data.items():
-                k = k.decode('utf-8')
-                v = v.decode('utf-8')
-                ret_dict[k] = v
+            else:
+                ret_dict.update(data)
         except Exception as e:
             ret_dict['status'] = 0
         return jsonify(ret_dict)
@@ -108,11 +93,11 @@ def pi_info():
     """
     r = get_conn()
     info = r.hgetall('pi_info')
-    info_dict = {}
-    for k, v in info.items():
-        k = k.decode('utf-8')
-        v = v.decode('utf-8')
-        info_dict[k] = v
+    info_dict = {'status': 1}
+    if not info:
+        info_dict = {'status': 0}
+    else:
+        info_dict.update(info)
     return jsonify(info_dict)
 
 
@@ -128,22 +113,20 @@ def lunar():
     if not day_info:
         day_info_dict['status'] = 0
         return jsonify(day_info_dict)
-    for k, v in day_info.items():
-        # print(k.decode('utf-8'), type(v.decode('utf-8')))
-        try:
-            day_info_dict[k.decode('utf-8')] = json.loads(v.decode('utf-8'))
-        except json.decoder.JSONDecodeError:
-            day_info_dict[k.decode('utf-8')] = ""
-    is_leap_month = day_info_dict['isLeapMonth']
-    lunar_month = LUNAR_SOLAR_MONTH.get(day_info_dict['lunarMonth'])
-    if is_leap_month:
-        lunar_month += '闰'
-    day_info_dict['lunarMonth'] = lunar_month
-    lunar_day = LUNAR_SOLAR_DAY.get(day_info_dict['lunarDay'])
-    day_info_dict["lunarDay"] = lunar_day
-    is_holiday = day_info_dict['isholiday']
-    if is_holiday is False:
-        day_info_dict['holiday'] = ''
+    try:
+        is_leap_month = day_info_dict['isLeapMonth']
+        lunar_month = LUNAR_SOLAR_MONTH.get(day_info_dict['lunarMonth'])
+        if is_leap_month:
+            lunar_month += '闰'
+        day_info_dict['lunarMonth'] = lunar_month
+        lunar_day = LUNAR_SOLAR_DAY.get(day_info_dict['lunarDay'])
+        day_info_dict["lunarDay"] = lunar_day
+        is_holiday = day_info_dict['isholiday']
+        if is_holiday is False:
+            day_info_dict['holiday'] = ''
+    except KeyError:
+        day_info_dict['status'] = 2
+        day_info_dict['nongli'] = day_info.get('nongLi')
     return jsonify(day_info_dict)
 
 
@@ -157,26 +140,6 @@ def todo():
     period_todo = {'title': 'a', 'date': '2022-03-29', 'period': 1, 'fix_day': False}
     return jsonify([])
     return jsonify([todo_list, period_todo])
-    # ret_list = []
-    # for item in period_todo:
-    #     title = item.title
-    #     date = item.date
-    #     fix_day = item.fix_day
-    #     period = item.period
-    #     days = (date - today).days  # 间隔天数
-    #     if not fix_day and days % period == 0:  # 间隔日期执行
-    #         ret_list.insert(0, title)
-    # for item in todo_list:
-    #     title = item['title']
-    #     date = item['date']
-    #     fix_day = item['fix_day']
-    #     if fix_day:  # 固定日期执行
-    #         if date.month <= today.month and date.year <= today.year:
-    #             ret_list.insert(0, title)
-    #     if today.day == date.day and date.month == today.month and date.year == today.year:  # 执行一次
-    #         if title not in ret_list:
-    #             ret_list.insert(0, title)
-    # return jsonify(ret_list)
 
 
 if __name__ == '__main__':
