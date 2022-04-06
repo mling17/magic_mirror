@@ -50,7 +50,7 @@ def weather():
     weather = weather_info.get('weather')
     weather_info['weather_icon'] = WEATHER_TABLE.get(weather)
     winddirection = weather_info.get('winddirection')
-    weather_info['winddirection_icon'] = WEATHER_TABLE.get(winddirection)
+    weather_info['winddirection_icon'] = WIND_DIRECT.get(winddirection)
     return jsonify(weather_info)
 
 
