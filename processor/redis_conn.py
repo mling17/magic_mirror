@@ -7,7 +7,7 @@ IS_REDIS_VERSION_2 = REDIS_CLIENT_VERSION.startswith('2.')
 
 class RedisClient(object):
     """
-    redis connection client of proxypool
+    redis connection client of pool
     """
 
     def __init__(self, host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, db=REDIS_DB,

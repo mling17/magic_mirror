@@ -3,12 +3,11 @@
 http://127.0.0.1:8000/temp_hum/   # POST方法未完成
 http://127.0.0.1:8000/todo/  # 读取mysql
 """
-import json
 import datetime
 from flask import Flask, request, render_template, jsonify, g
 from constant import WEATHER_TABLE, WIND_DIRECT, LUNAR_SOLAR_MONTH, LUNAR_SOLAR_DAY
 from .redis_conn import RedisClient
-from settings import API_HOST, API_PORT, API_THREADED, IS_DEV
+from settings import IS_DEV
 
 __all__ = ['app']
 

@@ -61,7 +61,7 @@ class DateInfo:
     def run(self):
         while True:
             day_info = self.redis.hget('day_info', 'day')
-            redis_day = None if day_info is None else day_info.decode('utf-8').strip('"').split('-')[-1]
+            redis_day = None if day_info is None else day_info.strip('"').split('-')[-1]
             today_day = str(datetime.date.today().day)
             if redis_day != today_day:
                 info_dict = self.get_day_info(type='info', day=datetime.date.today())

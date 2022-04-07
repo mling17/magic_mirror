@@ -3,6 +3,7 @@ import requests
 from loguru import logger
 from settings import LOCATION, CYCLE_WEATHER
 from processor.redis_conn import RedisClient
+from processor.mysql_conn import conn
 
 
 class Weather(object):
@@ -11,6 +12,17 @@ class Weather(object):
         self.redis = RedisClient().db
         # import redis
         # self.redis = self.db = redis.StrictRedis(host='127.0.0.1', port=6379)
+
+    @staticmethod
+    def get_stationid(district):
+        district = district.strip().rstrip('县')
+        sql = "select district,stationid from area_cn where district like %s or city like %s"
+        result = conn.fetch_one(sql, (district, district))
+        if not result:
+            logger.error('未找到【%s】的地区ID，请检查地区设置是否正确。')
+            return {'district': '北京', 'stationid': '101010100'}
+        else:
+            return result
 
     def weather(self, locate):
         """高德天气
@@ -35,9 +47,9 @@ class Weather(object):
             logger.error(e)
             return {}
 
-    def forecast(self):
-        # todo city id
-        url = 'https://www.weatherol.cn/api/home/getCurrAnd15dAnd24h?cityid=101120601'
+    def forecast(self, locate):
+        stationid = Weather.get_stationid(locate).get('stationid')
+        url = 'https://www.weatherol.cn/api/home/getCurrAnd15dAnd24h?cityid=%s' % stationid
         try:
             r = requests.get(url).json()
             return r['data']
@@ -56,10 +68,9 @@ class Weather(object):
                 self.redis.hmset('weather_info', weather_info)
                 logger.info(
                     f'{weather_info["city"]}，{weather_info["weather"]}，{weather_info["winddirection"]}风{weather_info["windpower"]}级，气温{weather_info["temperature"]}℃，湿度{weather_info["humidity"]}%，更新时间{weather_info["reporttime"]}')
-            weather_data = self.forecast()
+            weather_data = self.forecast(locate=LOCATION)
             current = weather_data['current']
             nongli = current.get('nongLi').split()[-1]
-
             self.redis.hset('day_info', 'nongLi', nongli)  # 如果获取农历API失效会使用此数据，前端不至于无显示
             forecast = weather_data.get('forecast15d')
             if forecast:
