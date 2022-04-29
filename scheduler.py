@@ -1,13 +1,14 @@
 import multiprocessing
 from loguru import logger
-
+from processor.interactive import Interactive
 from processor.get_weather import Weather
 from processor.server import app
 from processor.lunar_festival import DateInfo
 from processor.redis_conn import RedisClient
 from settings import ENABLE_PI, ENABLE_WEATHER, ENABLE_SERVER, ENABLE_LUNAR, APP_PROD_METHOD_GEVENT, \
     APP_PROD_METHOD_TORNADO, APP_PROD_METHOD_MEINHELD, IS_PROD, APP_PROD_METHOD, API_HOST, API_PORT, API_THREADED, \
-    ENVIRONMENT
+    ENVIRONMENT, ENABLE_INTERACTIVE
+
 if ENVIRONMENT.lower() == 'pi':
     from processor.pi import PiRun
 else:
@@ -76,13 +77,16 @@ class Scheduler(object):
         else:
             app.run(host=API_HOST, port=API_PORT, threaded=API_THREADED)
 
+    def run_interactive(self):
+        Interactive().run()
+
     def run(self):
         global pi_process, weather_process, lunar_process, server_process
         try:
             logger.info('starting magic mirror...')
             if ENABLE_PI:
                 pi_process = multiprocessing.Process(target=self.run_pi)
-                logger.info(f'starting tester, pid {pi_process.pid}...')
+                logger.info(f'starting PI, pid {pi_process.pid}...')
                 pi_process.start()
             else:
                 logger.info('Pi functions module is disable.')
@@ -100,7 +104,12 @@ class Scheduler(object):
                 lunar_process.start()
             else:
                 logger.info('Weather information module is disable.')
-
+            if ENABLE_INTERACTIVE:
+                int_process = multiprocessing.Process(target=self.run_interactive)
+                logger.info(f'starting interactive, pid {int_process.pid}...')
+                int_process.start()
+            else:
+                logger.info('Interactive functions module is disable.')
             if ENABLE_SERVER:
                 server_process = multiprocessing.Process(target=self.run_server)
                 logger.info(f'starting server, pid {server_process.pid}...')

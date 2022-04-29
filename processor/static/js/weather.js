@@ -5,7 +5,7 @@ setInterval(function () {
     updateWeather();
     updateForecast();
     updateHouseTempHum();
-}, 1000 * 60 * 5);
+}, 1000 * 60 * 5);//
 
 function updateWeather() {
     $.ajax({
@@ -15,9 +15,10 @@ function updateWeather() {
         url: '/weather/',
         success: function (res) {
             if (res.length !== 0) {
-                console.log(res)
                 $('.city').text(res.city);
-                $('.windpower').text(res.winddirection + res.windpower).addClass(res.winddirection_icon);
+                $('.windpower').text(res.winddirection + res.windpower).removeClass(function (index, className) {
+                    return (className.match(/(^|\s)wi-wind-\S+/g) || []).join(' ');
+                }).addClass(res.winddirection_icon);
                 $('.humidity-padding').text(res.humidity + "%");
                 $('.temp .icon').removeClass(function (index, className) {
                     return (className.match(/(^|\s)wi-\S+/g) || []).join(' ');
@@ -65,8 +66,6 @@ function updateForecast() {
         dataType: 'json',
         url: '/forecast/',
         success: function (res) {
-            console.log(res);
-            console.log(res[0])
             $('.forecast-table').text('');
             for (var i = 0; i < res.length; i++) {
                 $('.forecast-table').append(`<tr>

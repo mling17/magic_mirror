@@ -10,7 +10,6 @@ function updateToDo() {
         dataType: 'json',
         url: '/todo/',
         success: function (res) {
-            console.log(res);
             if (res.length == 0) {
                 $('.table').text('');
                 $('#module_3_calendar').addClass('hide');

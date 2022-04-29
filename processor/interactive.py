@@ -1,37 +1,90 @@
 import time
-from tools import sentence  # 一句话
-from tools import live  # 出生到现在的天数
-from tools import history  # 历史上的今天
 import random
-from tools.redis_connection import r
-from tools.seconds_to_tomorrow import seconds_to_tomorrow
+import requests
+from constant import HEADERS
+from loguru import logger
+from processor.redis_conn import conn
+from utiles import get_rest_second
 
-display_list = []
-
-
-def log(message):
-    msg = "[%s] 更新了%s" % (time.ctime(), message)
-    print(msg)
+taboo_words = ['逝世', '出生', ]  # 禁忌词
 
 
-def get_data():
-    sentence_string = sentence.onePhrase()
-    live_days_string = live.live_days()
-    history_list = history.history()
-    display_list.append(sentence_string)
-    display_list.append(live_days_string)
-    display_list.extend(history_list)
-    random.shuffle(history_list)
-    for item in display_list:
-        r.rpush('interactive_list', item)
-    log(display_list)
-    ex = seconds_to_tomorrow()
-    r.expire('interactive_list', ex)
+def has_taboo_word(string):
+    for word in taboo_words:
+        return True if word in string else False
 
 
-def main():
-    get_data()
+def get_json_data(url):
+    try:
+        r = requests.get(url, headers=random.choice(HEADERS))
+        r.raise_for_status()
+        r.encoding = r.apparent_encoding
+        return r.json()
+    except Exception as e:
+        logger.error(e)
+        return {}
+
+
+class Interactive:
+    def __init__(self):
+        self.display_list = []
+
+    def phrase(self):
+        # 一个短句
+        data = []
+        url = 'https://v1.hitokoto.cn/?encode=json&charset=utf-8'
+        count = 0
+        while len(data) < 3 and count < 100:
+            res = get_json_data(url).get('hitokoto')
+            if res:
+                data.append(res)
+            time.sleep(random.randint(0, 3))
+            count += 1
+        return data
+
+    def history(self):
+        # 历史上的今天
+        url = 'https://www.ipip5.com/today/api.php?type=json'
+        history_list = []
+        res = get_json_data(url)
+        if res:
+            for item in res['result']:
+                year = item.get('year')
+                title = item.get('title')
+                if has_taboo_word(title):
+                    continue
+                history_list.append(f'{year}年-{title}')
+        return history_list[:-1]
+
+    def poetry(self):
+        # 诗词
+        url = 'https://v2.jinrishici.com/one.json?client=browser-sdk/1.2&X-User-Token=A6BZsFOV4Ga2HnAPX8sl3IOnROMqI7Zb'
+        data = []
+        count = 0
+        while len(data) < 3 and count < 100:
+            res = get_json_data(url)
+            if res and res['status'] == 'success':
+                data.append(res['data']['content'])
+            time.sleep(random.randint(0, 3))
+            count += 1
+        return data
+
+    def run(self):
+        while True:
+            conn.del_key('interactive')
+            ph = self.phrase()  # list
+            hi = self.history()  # list
+            po = self.poetry()  # list
+            self.display_list = []
+            self.display_list.extend(ph)
+            self.display_list.extend(po)
+            for i in hi:
+                if len(i) < 40:
+                    self.display_list.append(i)
+            for item in self.display_list:
+                conn.db.rpush('interactive', item)
+            time.sleep(get_rest_second())
 
 
 if __name__ == '__main__':
-    get_data()
+    Interactive().run()

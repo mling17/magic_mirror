@@ -68,7 +68,7 @@ class DateInfo:
                 redis_day is not None and self.redis.delete('day_info')
                 if info_dict:
                     for k, v in info_dict.items():
-                        info_dict[k] = json.dumps(v, ensure_ascii=False)
+                        info_dict[k] = json.dumps(v, ensure_ascii=False).strip('"')
                     self.redis.hmset('day_info', info_dict)
             else:
                 time.sleep(min(get_rest_second(), CYCLE_LUNAR))

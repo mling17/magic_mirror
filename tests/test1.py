@@ -9,5 +9,6 @@ class RedisClient(object):
 
 
 r = RedisClient().db
-res = r.delete('day_info')
+# res = r.delete('day_info')
+res = r.hset('weather_info','winddirection','西北')
 print(res)

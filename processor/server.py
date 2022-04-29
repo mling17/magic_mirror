@@ -6,8 +6,9 @@ http://127.0.0.1:8000/todo/  # 读取mysql
 import datetime
 from flask import Flask, request, render_template, jsonify, g
 from constant import WEATHER_TABLE, WIND_DIRECT, LUNAR_SOLAR_MONTH, LUNAR_SOLAR_DAY
-from .redis_conn import RedisClient
+from .redis_conn import conn
 from settings import IS_DEV
+from loguru import logger
 
 __all__ = ['app']
 
@@ -23,7 +24,7 @@ def get_conn():
     :return:
     """
     if not hasattr(g, 'redis'):
-        g.redis = RedisClient().db
+        g.redis = conn.db
         # g.redis = redis.StrictRedis('192.168.1.4')
         # g.redis = redis.StrictRedis('127.0.0.1')
     return g.redis
@@ -112,18 +113,20 @@ def lunar():
     if not day_info:
         day_info_dict['status'] = 0
         return jsonify(day_info_dict)
+    day_info_dict.update(day_info)
     try:
         is_leap_month = day_info_dict['isLeapMonth']
-        lunar_month = LUNAR_SOLAR_MONTH.get(day_info_dict['lunarMonth'])
-        if is_leap_month:
+        lunar_month = LUNAR_SOLAR_MONTH.get(int(day_info_dict['lunarMonth']))
+        if is_leap_month != 'false':
             lunar_month += '闰'
         day_info_dict['lunarMonth'] = lunar_month
-        lunar_day = LUNAR_SOLAR_DAY.get(day_info_dict['lunarDay'])
+        lunar_day = LUNAR_SOLAR_DAY.get(int(day_info_dict['lunarDay']))
         day_info_dict["lunarDay"] = lunar_day
         is_holiday = day_info_dict['isholiday']
         if is_holiday is False:
             day_info_dict['holiday'] = ''
-    except KeyError:
+    except KeyError as e:
+        logger.error(e)
         day_info_dict['status'] = 2
         day_info_dict['nongli'] = day_info.get('nongLi')
     return jsonify(day_info_dict)
@@ -139,6 +142,14 @@ def todo():
     period_todo = {'title': 'a', 'date': '2022-03-29', 'period': 1, 'fix_day': False}
     return jsonify([])
     return jsonify([todo_list, period_todo])
+
+
+@app.route('/interactive/')
+def interactive():
+    data = {'status': 'success'}
+    length = conn.db.llen('interactive')
+    data['data'] = conn.db.lrange('interactive', 0, length)
+    return jsonify(data)
 
 
 if __name__ == '__main__':

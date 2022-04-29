@@ -2,14 +2,16 @@ import time
 import requests
 from loguru import logger
 from settings import LOCATION, CYCLE_WEATHER
-from processor.redis_conn import RedisClient
+from processor.redis_conn import conn as r_conn
 from processor.mysql_conn import conn
+from random import choice
+from constant import HEADERS
 
 
 class Weather(object):
     # 输入位置，查询天气
     def __init__(self):
-        self.redis = RedisClient().db
+        self.redis = r_conn.db
         # import redis
         # self.redis = self.db = redis.StrictRedis(host='127.0.0.1', port=6379)
 
@@ -37,7 +39,7 @@ class Weather(object):
         key = '4c5d8cfd09b55f48aee4a9f26e83aa75'
         url = 'https://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s' % (key, locate)
         try:
-            weather_dict = requests.get(url).json()
+            weather_dict = requests.get(url, headers=choice(HEADERS)).json()
             status = weather_dict.get('status')
             # print(status, type(status))
             if status == "1":
@@ -50,8 +52,9 @@ class Weather(object):
     def forecast(self, locate):
         stationid = Weather.get_stationid(locate).get('stationid')
         url = 'https://www.weatherol.cn/api/home/getCurrAnd15dAnd24h?cityid=%s' % stationid
+        # 'https://www.weatherol.cn/api/home/getCurrAnd15dAnd24h?cityid=101120601'
         try:
-            r = requests.get(url).json()
+            r = requests.get(url, headers=choice(HEADERS)).json()
             return r['data']
             # return r['data']['forecast15d'][2:5]
         except Exception as e:
@@ -71,6 +74,8 @@ class Weather(object):
             weather_data = self.forecast(locate=LOCATION)
             current = weather_data['current']
             nongli = current.get('nongLi').split()[-1]
+            tips = current.get('tips')
+            self.redis.lpush('interactive', tips)
             self.redis.hset('day_info', 'nongLi', nongli)  # 如果获取农历API失效会使用此数据，前端不至于无显示
             forecast = weather_data.get('forecast15d')
             if forecast:

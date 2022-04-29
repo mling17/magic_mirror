@@ -37,6 +37,19 @@
         .hide {
             display: none;
         }
+
+        #box {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            color: #ffffff;
+            font-size: 50px;
+            height: 100px;
+            right: 50px;
+            left: 50px;
+            text-align: center;
+            top: 80%;
+        }
     </style>
 </head>
 
@@ -120,7 +133,8 @@
 
 
 <div class="lower-third center-hor">
-    <div class="compliment light interactive">帅爆了</div>
+    <!--    <div class="compliment light interactive" ></div>-->
+    <div class="compliment light interactive" id="box">帅呆了</div>
 </div>
 <div class="bottom bright title">
     <div class="pi_info left small" style="font-size: 0.2rem;width:500px"></div>
@@ -132,4 +146,5 @@
 <script type="text/javascript" src="{{url_for('static',filename='js/weather.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static',filename='js/todo.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static',filename='js/pi_info.js')}}"></script>
+
 </html>
