@@ -11,7 +11,9 @@ taboo_words = ['逝世', '出生', ]  # 禁忌词
 
 def has_taboo_word(string):
     for word in taboo_words:
-        return True if word in string else False
+        if word in string:
+            return True
+    return False
 
 
 def get_json_data(url):
@@ -35,10 +37,10 @@ class Interactive:
         url = 'https://v1.hitokoto.cn/?encode=json&charset=utf-8'
         count = 0
         while len(data) < 3 and count < 100:
-            res = get_json_data(url).get('hitokoto')
+            res = get_json_data(url).get('hitokoto').rstrip('。')
             if res:
                 data.append(res)
-            time.sleep(random.randint(0, 3))
+            time.sleep(random.randint(0, 2))
             count += 1
         return data
 
@@ -50,7 +52,7 @@ class Interactive:
         if res:
             for item in res['result']:
                 year = item.get('year')
-                title = item.get('title')
+                title = item.get('title').rstrip('。')
                 if has_taboo_word(title):
                     continue
                 history_list.append(f'{year}年-{title}')
@@ -64,8 +66,8 @@ class Interactive:
         while len(data) < 3 and count < 100:
             res = get_json_data(url)
             if res and res['status'] == 'success':
-                data.append(res['data']['content'])
-            time.sleep(random.randint(0, 3))
+                data.append(res['data']['content'].rstrip('。'))
+            time.sleep(random.randint(0, 2))
             count += 1
         return data
 
@@ -75,6 +77,9 @@ class Interactive:
             ph = self.phrase()  # list
             hi = self.history()  # list
             po = self.poetry()  # list
+            logger.info(f'添加金句：{",".join(ph)}')
+            logger.info(f'历史上的今天：{",".join(hi)}')
+            logger.info(f'今日诗词：{",".join(po)}')
             self.display_list = []
             self.display_list.extend(ph)
             self.display_list.extend(po)

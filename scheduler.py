@@ -1,4 +1,6 @@
 import multiprocessing
+import time
+
 from loguru import logger
 from processor.interactive import Interactive
 from processor.get_weather import Weather
@@ -40,6 +42,7 @@ class Scheduler(object):
         """
         run server for api
         """
+        time.sleep(5)
         if IS_PROD:
             if APP_PROD_METHOD == APP_PROD_METHOD_GEVENT:
                 try:

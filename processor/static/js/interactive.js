@@ -8,14 +8,14 @@ function init() {
     var i = 0;
     setInterval(function () {
         currentCompliment = compliments[i];
+        fun(currentCompliment);
         $('.compliment').updateWithText(currentCompliment, 3000);
-        fun();
         // $('.hd-text').updateWithText(currentCompliment, 1000);
         i++;
         if (i > 4) {
             i = 0
         }
-    }, 1000 * 30)//* 60
+    }, 1000 * 30)
 }
 
 function updateCompliment() {
@@ -52,7 +52,7 @@ var _randomIndex = Math.floor(Math.random() * compliments.length);
 currentCompliment = compliments[_randomIndex];
 $('.compliment').updateWithText(currentCompliment, 3000);
 
-function fun() {//动态调整font-size
+function fun(string) {//动态调整font-size
     let box = document.getElementById('box')
 
     function getFontSize(str, targetSize = 50) {
@@ -68,6 +68,7 @@ function fun() {//动态调整font-size
             context.font = font;
             return Math.floor(context.measureText(text).width)
         }
+
         while ((10 <= fontSize) && (practicalWidth > boxWith)) { // 所需宽度小于实际宽度，或者计算字体大于最小字体10
             fontSize -= 2
             practicalWidth = getWidth(str, fontSize); // 重新计算目标字符串所需宽度
@@ -78,6 +79,7 @@ function fun() {//动态调整font-size
         }
         return fontSize; // 输出fontSize
     }
+
     var str = $('.compliment').text()
     var size = getFontSize(str).toString()
     box.style.fontSize = size + 'px'
