@@ -10,6 +10,7 @@ function init() {
         currentCompliment = compliments[i];
         fun(currentCompliment);
         $('.compliment').updateWithText(currentCompliment, 3000);
+        fun(currentCompliment);
         // $('.hd-text').updateWithText(currentCompliment, 1000);
         i++;
         if (i > compliments.length) {
