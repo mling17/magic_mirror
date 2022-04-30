@@ -4,7 +4,7 @@ function init() {
     updateCompliment();
     setInterval(function () {
         updateCompliment();
-    }, 1000 * 60 * 5) //5分钟更新一次数据
+    }, 1000 * 60 * 1) //5分钟更新一次数据
     var i = 0;
     setInterval(function () {
         currentCompliment = compliments[i];
@@ -12,10 +12,10 @@ function init() {
         $('.compliment').updateWithText(currentCompliment, 3000);
         // $('.hd-text').updateWithText(currentCompliment, 1000);
         i++;
-        if (i > 4) {
+        if (i > compliments.length) {
             i = 0
         }
-    }, 1000 * 30)
+    }, 1000 * 15)
 }
 
 function updateCompliment() {
@@ -27,6 +27,7 @@ function updateCompliment() {
         success: function (res) {
             if (res.length !== 0) {
                 compliments = res.data;
+                console.log(compliments);
             }
         },
         error: function (err) {

@@ -50,9 +50,9 @@ class Weather(object):
             return {}
 
     def forecast(self, locate):
-        stationid = Weather.get_stationid(locate).get('stationid')
-        url = 'https://www.weatherol.cn/api/home/getCurrAnd15dAnd24h?cityid=%s' % stationid
-        # 'https://www.weatherol.cn/api/home/getCurrAnd15dAnd24h?cityid=101120601'
+        #stationid = Weather.get_stationid(locate).get('stationid')
+        #url = 'https://www.weatherol.cn/api/home/getCurrAnd15dAnd24h?cityid=%s' % stationid
+        url = 'https://www.weatherol.cn/api/home/getCurrAnd15dAnd24h?cityid=101120601'
         try:
             r = requests.get(url, headers=choice(HEADERS)).json()
             return r['data']
@@ -75,6 +75,7 @@ class Weather(object):
             current = weather_data['current']
             nongli = current.get('nongLi').split()[-1]
             tips = current.get('tips')
+            self.redis.lpop('interactive')
             self.redis.lpush('interactive', tips)
             self.redis.hset('day_info', 'nongLi', nongli)  # 如果获取农历API失效会使用此数据，前端不至于无显示
             forecast = weather_data.get('forecast15d')
