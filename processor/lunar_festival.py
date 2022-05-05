@@ -51,6 +51,7 @@ class DateInfo:
 
     def get_day_info(self, **kwargs):
         params = urlencode(kwargs)
+        # http://api.xlongwei.com/service/datetime/workday.json?type=info&day=2022-05-05
         url = 'http://api.xlongwei.com/service/datetime/workday.json?%s' % params
         try:
             info = requests.get(url, headers=choice(HEADERS)).json()
@@ -58,13 +59,28 @@ class DateInfo:
         except Exception as e:
             pass
 
+    def get_day_info_2(self, **kwargs):
+        params = urlencode(kwargs)
+        url = 'https://www.iamwawa.cn/nongli/api?%s' % params
+        try:
+            print(url)
+            info = requests.get(url, headers=choice(HEADERS)).json()
+            print(info)
+            return info
+        except Exception as e:
+            print(e)
+            pass
+
     def run(self):
         while True:
             day_info = self.redis.hget('day_info', 'day')
             redis_day = None if day_info is None else day_info.strip('"').split('-')[-1]
-            today_day = str(datetime.date.today().day)
+            today = datetime.date.today()
+            today_day = str(today.day)
             if redis_day != today_day:
                 info_dict = self.get_day_info(type='info', day=datetime.date.today())
+                # info_dict = self.get_day_info_2(type='solar', year=today.year, month=today.month, day=today_day)
+                # print(info_dict)
                 redis_day is not None and self.redis.delete('day_info')
                 if info_dict:
                     for k, v in info_dict.items():
