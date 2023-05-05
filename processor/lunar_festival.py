@@ -59,6 +59,37 @@ class DateInfo:
         except Exception as e:
             pass
 
+    def get_day_info(self, **kwargs):
+        import requests
+
+        cookies = {
+            '__gads': 'ID=33003fec839c50b4-222d14649be00057:T=1683254230:RT=1683254230:S=ALNI_MaOdrY89bXDxv2fjmkVH4PewGe0EQ',
+            '__gpi': 'UID=00000c01b75cac7d:T=1683254230:RT=1683254230:S=ALNI_MaEjTkTfQrDkfggIXJT0e4-zGZdyQ',
+        }
+
+        headers = {
+            'authority': 'v.api.aa1.cn',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept-language': 'zh-CN,zh;q=0.9',
+            'cache-control': 'no-cache',
+            # 'cookie': '__gads=ID=33003fec839c50b4-222d14649be00057:T=1683254230:RT=1683254230:S=ALNI_MaOdrY89bXDxv2fjmkVH4PewGe0EQ; __gpi=UID=00000c01b75cac7d:T=1683254230:RT=1683254230:S=ALNI_MaEjTkTfQrDkfggIXJT0e4-zGZdyQ',
+            'pragma': 'no-cache',
+            'sec-ch-ua': '"Google Chrome";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'document',
+            'sec-fetch-mode': 'navigate',
+            'sec-fetch-site': 'cross-site',
+            'sec-fetch-user': '?1',
+            'upgrade-insecure-requests': '1',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
+        }
+        try:
+            response = requests.get('https://v.api.aa1.cn/api/nl/', cookies=cookies, headers=headers)
+            return response.json()
+        except Exception as e:
+            pass
+
     def get_day_info_2(self, **kwargs):
         params = urlencode(kwargs)
         url = 'https://www.iamwawa.cn/nongli/api?%s' % params

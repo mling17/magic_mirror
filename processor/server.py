@@ -128,7 +128,11 @@ def lunar():
     except KeyError as e:
         logger.error(e)
         day_info_dict['status'] = 2
-        day_info_dict['nongli'] = day_info.get('nongLi')
+        try:
+            day_info_dict['nongli'] = day_info['nongLi']
+        except KeyError:
+            day_info_dict['nongli'] = day_info.get('nl')
+
     return jsonify(day_info_dict)
 
 
